@@ -1,40 +1,74 @@
 console.log( 'js' );
 
 $( document ).ready( function(){
-  console.log( 'JQ' );
+  renderKoalas();
   // Establish Click Listeners
-  setupClickListeners()
+  $('#addButton').on('click', addKoala )
   // load existing koalas on page load
-  getKoalas();
+  
 
 }); // end doc ready
 
-function setupClickListeners() {
-  $( '#addButton' ).on( 'click', function(){
-    console.log( 'in addButton on click' );
-    // get user input and put in an object
-    // NOT WORKING YET :(
-    // using a test object
-    let koalaToSend = {
-      name: 'testName',
-      age: 'testName',
-      gender: 'testName',
-      readyForTransfer: 'testName',
-      notes: 'testName',
-    };
-    // call saveKoala with the new obejct
-    saveKoala( koalaToSend );
-  }); 
+function addKoala() {
+  console.log( 'in addButton on click' );
+  let name = $('#nameIn').val();
+  let age = $('#ageIn').val();
+  let gender = $('#genderIn').val();
+  let ready_for_transfer = $('#readyForTransferIn').val();
+  let notes = $('#notesIn').val();
+
+  let koalaToSend = {
+    name: name,
+    age: age,
+    gender: gender,
+    ready_for_transfer: ready_for_transfer,
+    notes: notes,
+  };
+  console.log(koalaToSend);
+  $.ajax({
+    method: 'POST',
+    url: '/koalas',
+    data: koalaToSend
+  }).then ((response) => {
+    console.log(response);
+    renderKoalas();
+  }).catch((error) => {
+    console.log('something happened in post', error);
+  })
 }
 
-function getKoalas(){
-  console.log( 'in getKoalas' );
+
+
+
+function renderKoalas(){
+  $.ajax({
+    type: 'GET',
+    url: '/koalas'
+  }).then((res)=>{
+    $('#viewKoalas').empty()
+    for (let koalas of res){
+      console.log(koalas);
+      $('#viewKoalas').append(`
+      <tr>
+      <td>${koalas.name}</td>
+      <td>${koalas.age}</td>
+      <td>${koalas.gender}</td>
+      <td>${koalas.ready_for_transfer}</td>
+      <td>${koalas.notes}</td>
+      </tr>
+      `)
+    }
+
+  }).catch((error)=>{
+    console.log('it broke /GET from client', error);
+  })
   // ajax call to server to get koalas
   
 } // end getKoalas
 
-function saveKoala( newKoala ){
-  console.log( 'in saveKoala', newKoala );
-  // ajax call to server to get koalas
+// function saveKoala( newKoala ){
+//   console.log( 'in saveKoala', newKoala );
+//   // ajax call to server to get koalas
  
-}
+// }
+
