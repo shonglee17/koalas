@@ -5,9 +5,39 @@ $( document ).ready( function(){
   // Establish Click Listeners
   $('#addButton').on('click', addKoala )
   // load existing koalas on page load
-  
+  $('body').on('click', '.deleteButton', deleteKoala)
+  $('body').on('click', '.transferButton', updateTransfer)
 
 }); // end doc ready
+function updateTransfer(){
+  let whatIsThis = $(this).data().id
+
+
+  $.ajax({
+    method: 'PUT',
+    url: `/koalas/${whatIsThis}`,
+    data: {
+      ready_for_transfer: 'True'
+      }
+  }).then((response)=>{
+    renderKoalas()
+  }).catch((error) =>{
+    console.log('something broke in PUT: client side', error);
+  })
+
+}
+
+function deleteKoala(){
+  let whatIsThis = $(this).data().id
+  $.ajax({
+    method: 'DELETE',
+    url: `/koalas/${whatIsThis}`,
+  }).then((response)=>{
+    renderKoalas()
+  }).catch((error) =>{
+    console.log('something broke in DELETE: client side', error);
+  })
+}
 
 function addKoala() {
   console.log( 'in addButton on click' );
@@ -37,9 +67,6 @@ function addKoala() {
   })
 }
 
-
-
-
 function renderKoalas(){
   $.ajax({
     type: 'GET',
@@ -47,7 +74,11 @@ function renderKoalas(){
   }).then((res)=>{
     $('#viewKoalas').empty()
     for (let koalas of res){
-      console.log(koalas);
+      
+        if (koalas.ready_for_transfer !== 'True'){
+          console.log('it works guy!');
+        
+      // $('#deleteButton').append(`<tr><td><button class="deleteButton">DELETE</button></td><tr>`)
       $('#viewKoalas').append(`
       <tr>
       <td>${koalas.name}</td>
@@ -55,10 +86,26 @@ function renderKoalas(){
       <td>${koalas.gender}</td>
       <td>${koalas.ready_for_transfer}</td>
       <td>${koalas.notes}</td>
+      <td><button class="transferButton" data-id=${koalas.id}>TRANSFER</button></td>
+      <td><button class="deleteButton" data-id=${koalas.id}>DELETE</button></td>
+      </tr>
+      `)
+    }else{
+      $('#viewKoalas').append(`
+      <tr>
+      <td>${koalas.name}</td>
+      <td>${koalas.age}</td>
+      <td>${koalas.gender}</td>
+      <td>${koalas.ready_for_transfer}</td>
+      <td>${koalas.notes}</td>
+      <td></td>
+      <td><button class="deleteButton" data-id=${koalas.id}>DELETE</button></td>
       </tr>
       `)
     }
-
+  }
+    
+    
   }).catch((error)=>{
     console.log('it broke /GET from client', error);
   })

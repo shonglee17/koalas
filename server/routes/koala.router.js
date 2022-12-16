@@ -14,7 +14,6 @@ router.get('/', (req,res) =>{
 
     pool.query(sqlQuery)
     .then((dbRes)=>{
-        console.log('hey this is our dbRes!', dbRes.rows);
         let koalas = dbRes.rows
         res.send(koalas)
     }).catch((dbErr) =>{
@@ -46,8 +45,49 @@ router.post('/', (req, res) => {
 });
 
 // PUT
+router.put('/:id', (req,res)=>{
+    let idToUpdate = req.params.id
+    let newTransfer = req.body.ready_for_transfer
+    console.log(idToUpdate);
+    console.log(newTransfer);
+    let sqlQuery = `
+    UPDATE "Koalas"
+    SET "ready_for_transfer" = $1
+    WHERE "id" = $2;
+    `;
 
+    let sqlValues = [newTransfer, idToUpdate]
+
+    pool.query(sqlQuery, sqlValues)
+    .then((dbRes)=>{
+        console.log('successful update from put: serverside');
+        res.sendStatus(201)
+    }).catch(( dbErr)=>{
+        console.log('broke in PUT serverside', dbErr);
+        res.sendStatus(500)
+    })
+})
 
 // DELETE
+
+router.delete('/:id', (req,res)=>{
+    let idToDelete = req.params.id
+   
+    let sqlQuery = `
+    DELETE FROM "Koalas"
+    WHERE "id" = $1;
+    `;
+
+    let sqlValues = [idToDelete]
+
+    pool.query(sqlQuery, sqlValues)
+    .then((dbRes)=>{
+        console.log('successful update from DELETE: serverside');
+        res.sendStatus(201)
+    }).catch(( dbErr)=>{
+        console.log('broke in DELETE serverside', dbErr);
+        res.sendStatus(500)
+    })
+})
 
 module.exports = router;
